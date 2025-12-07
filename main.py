@@ -26,8 +26,8 @@ from src.model import GWClassifier
 from src.train import Trainer
 
 # --- 配置参数 ---
-# DATA_DIR = "data/raw"  # 数据目录
-DATA_DIR = "E:/老笔记本电脑移出/data..raw"
+DATA_DIR = "data/raw"  # 数据目录
+# DATA_DIR = "E:/老笔记本电脑移出/data..raw"
 LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
 MODEL_SAVE_PATH = "models/best_model.pth"  # 模型保存路径
 
