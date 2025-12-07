@@ -1,9 +1,15 @@
+"""
+引力波检测项目 - 主训练脚本
+使用EfficientNet-B0模型训练引力波信号分类器
+"""
+
 import os
 import warnings
 import random
 import numpy as np
 
-# --- 1. NUCLEAR WARNING SUPPRESSION ---
+# --- 1. 警告抑制 ---
+# 抑制各种警告信息，保持输出清洁
 os.environ["PYTHONWARNINGS"] = "ignore"
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 warnings.filterwarnings("ignore")
@@ -12,26 +18,30 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*pin_memory.*") 
 
-# --- 2. IMPORTS ---
+# --- 2. 导入库 ---
 import torch
 import matplotlib.pyplot as plt
 from src.dataset import create_dataloaders
 from src.model import GWClassifier
 from src.train import Trainer
 
-# --- CONFIGURATION ---
-DATA_DIR = "data/raw"
-LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")
-MODEL_SAVE_PATH = "models/best_model.pth"
+# --- 配置参数 ---
+# DATA_DIR = "data/raw"  # 数据目录
+DATA_DIR = "E:/老笔记本电脑移出/data..raw"
+LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
+MODEL_SAVE_PATH = "models/best_model.pth"  # 模型保存路径
 
-BATCH_SIZE = 32
-EPOCHS = 12   
-LEARNING_RATE = 5e-5 
-SEED = 42         
+BATCH_SIZE = 32  # 批次大小
+EPOCHS = 12      # 训练轮数
+LEARNING_RATE = 5e-5  # 学习率
+SEED = 42        # 随机种子，确保结果可复现         
 
 def set_seed(seed):
     """
-    Locks all sources of randomness to ensure reproducible results.
+    设置所有随机数生成器的种子，确保结果可复现
+    
+    参数:
+        seed: 随机种子值
     """
     random.seed(seed)
     np.random.seed(seed)
@@ -39,15 +49,21 @@ def set_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
-        # Ensure deterministic behavior on CUDA (might slow down slightly but worth it)
+        # 确保CUDA的确定性行为（可能会稍微减慢速度，但值得）
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
     print(f"🔒 Seed set to {seed}")
 
 def plot_results(history):
+    """
+    绘制训练历史结果图表
+    
+    参数:
+        history: 包含训练和验证损失及AUC的字典
+    """
     plt.figure(figsize=(12, 5))
     
-    # Plot 1: Loss
+    # 图表1: 损失曲线
     plt.subplot(1, 2, 1)
     plt.plot(history['train_loss'], label='Train Loss')
     plt.plot(history['val_loss'], label='Val Loss', linestyle='--')
@@ -57,7 +73,7 @@ def plot_results(history):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Plot 2: AUC Score
+    # 图表2: AUC分数曲线
     plt.subplot(1, 2, 2)
     plt.plot(history['train_auc'], label='Train AUC')
     plt.plot(history['val_auc'], label='Val AUC', linestyle='--')
@@ -72,10 +88,13 @@ def plot_results(history):
     print("\n📊 Plots saved as 'training_results.png'")
 
 def main():
-    # 0. Set Seed (FIRST THING TO DO)
+    """
+    主函数：执行完整的训练流程
+    """
+    # 0. 设置随机种子（首先执行以确保可复现性）
     set_seed(SEED)
 
-    # 1. Setup Device
+    # 1. 设置计算设备
     if torch.backends.mps.is_available():
         device = torch.device("mps")
         print("🚀 Using Device: MacOS GPU (MPS)")
@@ -86,7 +105,7 @@ def main():
         device = torch.device("cpu")
         print("⚠️ Using Device: CPU")
 
-    # 2. Prepare Data
+    # 2. 准备数据
     print("\n[1/3] Loading Data (Smart Search)...")
     try:
         train_loader, val_loader = create_dataloaders(
@@ -100,13 +119,13 @@ def main():
         print(f"❌ Error: {e}")
         return
 
-    # 3. Initialize Model
+    # 3. 初始化模型
     print("\n[2/3] Initializing EfficientNet Model (RGB Mode)...")
-    model = GWClassifier(pretrained=True)
+    model = GWClassifier(pretrained=True)  # 使用ImageNet预训练权重
     
-    # 4. Start Training
+    # 4. 开始训练
     print("\n[3/3] Starting Training Loop...")
-    os.makedirs("models", exist_ok=True)
+    os.makedirs("models", exist_ok=True)  # 创建模型保存目录
     
     trainer = Trainer(
         model=model,
@@ -118,7 +137,7 @@ def main():
     
     history = trainer.fit(epochs=EPOCHS, save_path=MODEL_SAVE_PATH)
     
-    # 5. Wrap up
+    # 5. 收尾工作：绘制结果图表
     plot_results(history)
     print(f"\n✅ Training Complete! Best model weights saved to: {MODEL_SAVE_PATH}")
 
