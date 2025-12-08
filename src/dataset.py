@@ -54,9 +54,16 @@ class G2NetDataset(Dataset):
         wave_tensor = torch.from_numpy(waves).float()
         
         # 3. 安全归一化（每个通道独立进行最小-最大归一化）
-        for i in range(3):  # 对3个探测器通道分别归一化
-            w_min = wave_tensor[i].min()
-            w_max = wave_tensor[i].max()
+        # 为什么需要归一化：
+        # - 不同探测器的信号幅度可能差异很大（LIGO Hanford、LIGO Livingston、Virgo）
+        # - 归一化可以消除幅度差异，让模型关注信号形状而非绝对强度
+        # - 独立归一化每个通道：保持各探测器的相对特征，避免强信号通道主导弱信号通道
+        for i in range(3):  # 遍历3个探测器通道（LIGO Hanford、LIGO Livingston、Virgo）
+            w_min = wave_tensor[i].min()  # 获取第i个通道的最小值
+            w_max = wave_tensor[i].max()  # 获取第i个通道的最大值
+            # 最小-最大归一化公式：(x - min) / (max - min)
+            # 结果范围：[0, 1]，其中0对应最小值，1对应最大值
+            # 添加1e-8：防止max==min时除零错误（当信号为常数时）
             wave_tensor[i] = (wave_tensor[i] - w_min) / (w_max - w_min + 1e-8)
 
         # 4. CQT变换和对数缩放
@@ -90,6 +97,9 @@ def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
     print(f"Scanning {data_dir} for .npy files...")
     df = pd.read_csv(labels_file)
     
+    # 打印出文件数量
+    print(f"Found {len(df)} samples in labels file.")
+    
     # 扫描目录，建立文件ID到文件路径的映射
     file_path_map = {}
     for root, dirs, files in os.walk(data_dir):
@@ -97,6 +107,9 @@ def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
             if file.endswith(".npy"):
                 file_id = os.path.splitext(file)[0]  # 提取文件ID（不含扩展名）
                 file_path_map[file_id] = os.path.join(root, file)
+    
+    # 打印出file_path_map的数量
+    print(f"Found {len(file_path_map)} files in data directory.")
     
     # 匹配标签文件中的ID和实际数据文件
     file_paths = []
