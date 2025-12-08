@@ -54,7 +54,7 @@ class Trainer:
         all_targets = []
         all_preds = []
         
-        pbar = tqdm(self.train_loader, desc="Training", leave=False)
+        pbar = tqdm(self.train_loader, desc="Training", leave=False)  # leave=False: 进度条完成后从终端清除，保持输出简洁
         
         for images, targets in pbar:
             images, targets = images.to(self.device), targets.to(self.device)

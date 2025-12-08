@@ -26,9 +26,11 @@ from src.model import GWClassifier
 from src.train import Trainer
 
 # --- 配置参数 ---
-DATA_DIR = "data/raw"  # 数据目录
+# DATA_DIR = "data/raw"  # 数据目录
+DATA_DIR = "/kaggle/input/g2net-gravitational-wave-detection/train"
 # DATA_DIR = "E:/老笔记本电脑移出/data..raw"
-LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
+# LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
+LABELS_FILE = "/kaggle/input/g2net-gravitational-wave-detection/train/training_labels.csv"
 MODEL_SAVE_PATH = "models/best_model.pth"  # 模型保存路径
 
 BATCH_SIZE = 32  # 批次大小
