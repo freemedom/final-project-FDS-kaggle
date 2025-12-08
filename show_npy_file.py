@@ -13,6 +13,9 @@ def show_npy_file(file_path):
     
     参数:
         file_path: .npy文件路径
+    
+    注意: 在Jupyter notebook中使用时，建议先运行:
+        %matplotlib inline
     """
     if not os.path.exists(file_path):
         print(f"❌ 错误: 文件不存在: {file_path}")
@@ -71,7 +74,24 @@ def show_npy_file(file_path):
     
     # 尝试可视化（如果matplotlib可用）
     try:
+        import matplotlib
         import matplotlib.pyplot as plt
+        
+        # 在Jupyter notebook中，确保使用inline后端
+        try:
+            from IPython import get_ipython
+            ipython = get_ipython()
+            if ipython is not None:
+                # 在Jupyter中，使用inline后端
+                ipython.run_line_magic('matplotlib', 'inline')
+        except:
+            # 如果不是在IPython环境中，尝试设置后端
+            try:
+                # 在Kaggle等环境中，可能需要使用Agg后端
+                if 'KAGGLE' in os.environ or 'KAGGLE_KERNEL_RUN_TYPE' in os.environ:
+                    matplotlib.use('Agg')
+            except:
+                pass
         
         if data.shape == (3, 4096):
             # 绘制3个探测器的信号
@@ -86,7 +106,12 @@ def show_npy_file(file_path):
                 ax.grid(True, alpha=0.3)
             
             plt.tight_layout()
-            plt.show()  # 在Jupyter notebook中直接显示
+            # 在Jupyter notebook中显示图表
+            try:
+                from IPython.display import display
+                display(plt.gcf())
+            except:
+                plt.show()
         else:
             # 对于其他形状的数据，简单绘制
             plt.figure(figsize=(10, 6))
@@ -100,7 +125,12 @@ def show_npy_file(file_path):
             plt.xlabel("Index")
             plt.ylabel("Value")
             plt.grid(True, alpha=0.3)
-            plt.show()  # 在Jupyter notebook中直接显示
+            # 在Jupyter notebook中显示图表
+            try:
+                from IPython.display import display
+                display(plt.gcf())
+            except:
+                plt.show()
     except ImportError:
         print("💡 提示: 安装matplotlib可以生成可视化图表")
         print("   命令: pip install matplotlib")
