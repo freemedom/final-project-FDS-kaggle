@@ -80,9 +80,30 @@ class TestDataset(Dataset):
         return image, file_id
 
 
+def get_file_path(data_dir, file_id):
+    """
+    根据文件ID构建文件路径
+    利用目录结构规律：文件ID的前3个字符分别对应3层目录结构
+    
+    参数:
+        data_dir: 数据目录根路径
+        file_id: 文件ID（不含扩展名）
+        
+    返回:
+        完整的文件路径
+        
+    示例:
+        get_file_path("/data", "21000bb588") -> "/data/2/1/0/21000bb588.npy"
+    """
+    if len(file_id) < 3:
+        raise ValueError(f"File ID must be at least 3 characters: {file_id}")
+    return os.path.join(data_dir, file_id[0], file_id[1], file_id[2], f"{file_id}.npy")
+
+
 def find_test_files(test_dir):
     """
     扫描测试目录，找到所有.npy文件
+    优化：限制os.walk深度为3层，因为文件都在3层目录下
     
     参数:
         test_dir: 测试目录路径
@@ -95,7 +116,22 @@ def find_test_files(test_dir):
     file_ids = []
     
     print(f"扫描测试目录: {test_dir}")
+    print("优化：只遍历3层深度的目录（文件都在3层目录下）")
+    
+    # 计算根目录的深度（用于限制遍历深度）   #实际上没用，ai误生成的
+    root_depth = len(os.path.normpath(test_dir).split(os.sep))
+    max_depth = root_depth + 3  # 只遍历到3层子目录
+    
     for root, dirs, files in os.walk(test_dir):
+        # 计算当前目录的深度
+        current_depth = len(os.path.normpath(root).split(os.sep))
+        
+        # 如果达到或超过3层深度，处理文件但不继续深入遍历
+        if current_depth >= max_depth:
+            # 清空dirs列表，防止os.walk继续深入更深层的目录
+            dirs[:] = []
+        
+        # 处理当前目录中的文件（文件在3层目录下，所以当current_depth == max_depth时处理）
         for file in files:
             if file.endswith(".npy"):
                 file_path = os.path.join(root, file)

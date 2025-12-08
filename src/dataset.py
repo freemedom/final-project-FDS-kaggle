@@ -80,6 +80,25 @@ class G2NetDataset(Dataset):
         label = torch.tensor(self.targets[idx], dtype=torch.float32)
         return image, label
 
+def get_file_path(data_dir, file_id):
+    """
+    根据文件ID构建文件路径
+    利用目录结构规律：文件ID的前3个字符分别对应3层目录结构
+    
+    参数:
+        data_dir: 数据目录根路径
+        file_id: 文件ID（不含扩展名）
+        
+    返回:
+        完整的文件路径
+        
+    示例:
+        get_file_path("/data", "21000bb588") -> "/data/2/1/0/21000bb588.npy"
+    """
+    if len(file_id) < 3:
+        raise ValueError(f"File ID must be at least 3 characters: {file_id}")
+    return os.path.join(data_dir, file_id[0], file_id[1], file_id[2], f"{file_id}.npy")
+
 def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
     """
     创建训练和验证数据加载器
@@ -94,31 +113,33 @@ def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
         train_loader: 训练数据加载器
         val_loader: 验证数据加载器
     """
-    print(f"Scanning {data_dir} for .npy files...")
+    print(f"Loading labels from {labels_file}...")
     df = pd.read_csv(labels_file)
     
     # 打印出文件数量
     print(f"Found {len(df)} samples in labels file.")
     
-    # 扫描目录，建立文件ID到文件路径的映射
-    file_path_map = {}
-    for root, dirs, files in os.walk(data_dir):
-        for file in files:
-            if file.endswith(".npy"):
-                file_id = os.path.splitext(file)[0]  # 提取文件ID（不含扩展名）
-                file_path_map[file_id] = os.path.join(root, file)
-    
-    # 打印出file_path_map的数量
-    print(f"Found {len(file_path_map)} files in data directory.")
-    
-    # 匹配标签文件中的ID和实际数据文件
+    # 优化：直接从标签文件读取ID，根据ID构建路径，避免遍历整个目录
+    # 利用目录结构规律：文件ID的前3个字符分别对应3层目录结构
     file_paths = []
     valid_indices = []
+    missing_files = []
+    
+    print("Building file paths from labels (no directory scan needed)...")
     for idx, row in df.iterrows():
         f_id = row['id']
-        if f_id in file_path_map:
-            file_paths.append(file_path_map[f_id])
+        # 根据文件ID直接构建路径
+        file_path = get_file_path(data_dir, f_id)
+        
+        # 检查文件是否存在
+        if os.path.exists(file_path):
+            file_paths.append(file_path)
             valid_indices.append(idx)
+        else:
+            missing_files.append(f_id)
+    
+    if len(missing_files) > 0:
+        print(f"⚠️ Warning: {len(missing_files)} files not found (first 5: {missing_files[:5]})")
             
     targets = df.loc[valid_indices, 'target'].values
     print(f"Matched {len(file_paths)} samples.")
