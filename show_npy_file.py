@@ -80,9 +80,9 @@ def show_npy_file(file_path):
             
             for i, (ax, name) in enumerate(zip(axes, detector_names)):
                 ax.plot(data[i], linewidth=0.5)
-                ax.set_title(f"{name} - 通道 {i}")
-                ax.set_xlabel("采样点")
-                ax.set_ylabel("幅度")
+                ax.set_title(f"{name} - Channel {i}")
+                ax.set_xlabel("Sample Point")
+                ax.set_ylabel("Amplitude")
                 ax.grid(True, alpha=0.3)
             
             plt.tight_layout()
@@ -94,11 +94,11 @@ def show_npy_file(file_path):
                 plt.plot(data)
             elif data.ndim == 2:
                 for i in range(min(3, data.shape[0])):
-                    plt.plot(data[i], label=f"通道 {i}", alpha=0.7)
+                    plt.plot(data[i], label=f"Channel {i}", alpha=0.7)
                 plt.legend()
-            plt.title(f"数据可视化: {os.path.basename(file_path)}")
-            plt.xlabel("索引")
-            plt.ylabel("值")
+            plt.title(f"Data Visualization: {os.path.basename(file_path)}")
+            plt.xlabel("Index")
+            plt.ylabel("Value")
             plt.grid(True, alpha=0.3)
             plt.show()  # 在Jupyter notebook中直接显示
     except ImportError:
