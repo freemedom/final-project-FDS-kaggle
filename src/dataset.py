@@ -82,8 +82,9 @@ class G2NetDataset(Dataset):
 
 def get_file_path(data_dir, file_id):
     """
-    根据文件ID构建文件路径
-    利用目录结构规律：文件ID的前3个字符分别对应3层目录结构
+    根据文件ID构建文件路径。
+    - 若 data_dir 指向扁平结构（例如 "data/raw"），文件直接位于该目录，无子文件夹。
+    - 否则按照 Kaggle 原始层级：文件ID前3个字符对应3层子目录。
     
     参数:
         data_dir: 数据目录根路径
@@ -94,9 +95,17 @@ def get_file_path(data_dir, file_id):
         
     示例:
         get_file_path("/data", "21000bb588") -> "/data/2/1/0/21000bb588.npy"
+        get_file_path("data/raw", "21000bb588") -> "data/raw/21000bb588.npy"
     """
     if len(file_id) < 3:
         raise ValueError(f"File ID must be at least 3 characters: {file_id}")
+    
+    # 扁平目录：直接放在 data/raw 下
+    norm_dir = os.path.normpath(data_dir)
+    if norm_dir.endswith(os.path.normpath("data/raw")):
+        return os.path.join(data_dir, f"{file_id}.npy")
+    
+    # 分层目录：按前3字符拆分
     return os.path.join(data_dir, file_id[0], file_id[1], file_id[2], f"{file_id}.npy")
 
 def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
