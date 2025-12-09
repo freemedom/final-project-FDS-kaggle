@@ -104,7 +104,7 @@ def get_file_path(data_dir, file_id):
     # 标准化路径：消除多余分隔符/相对符号，方便后续 endswith 判断
     # 例：normpath("data/raw/../raw//") -> "data\\raw"（Windows）或 "data/raw"（类Unix）
     norm_dir = os.path.normpath(data_dir)
-    if norm_dir.endswith(os.path.normpath("data/raw")):
+    if norm_dir.endswith(os.path.normpath("data/raw/g2net_medium")):
         return os.path.join(data_dir, f"{file_id}.npy")
     
     # 分层目录：按前3字符拆分
