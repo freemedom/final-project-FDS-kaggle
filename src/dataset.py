@@ -141,10 +141,10 @@ def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
         f_id = row['id']
         # 根据文件ID直接构建路径
         file_path = get_file_path(data_dir, f_id)
-        print(f"Resolved path for id={f_id}: {file_path}")
+        # print(f"Resolved path for id={f_id}: {file_path}")
         
         # 打印当前的工作路径
-        print(f"Current working directory: {os.getcwd()}")
+        # print(f"Current working directory: {os.getcwd()}")
         
         # 检查文件是否存在
         if os.path.exists(file_path):
