@@ -37,10 +37,25 @@ def show_npy_file(file_path):
     
     # 统计信息
     print("📈 统计信息:")
-    print(f"  最小值: {data.min():.6f}")
-    print(f"  最大值: {data.max():.6f}")
-    print(f"  平均值: {data.mean():.6f}")
-    print(f"  标准差: {data.std():.6f}")
+    # 使用科学计数法显示，避免极小值被四舍五入为0
+    min_val = data.min()
+    max_val = data.max()
+    mean_val = data.mean()
+    std_val = data.std()
+    
+    # 根据数值大小选择合适的显示格式
+    if abs(min_val) < 1e-3 or abs(max_val) < 1e-3:
+        # 对于极小的值，使用科学计数法
+        print(f"  最小值: {min_val:.6e}")
+        print(f"  最大值: {max_val:.6e}")
+        print(f"  平均值: {mean_val:.6e}")
+        print(f"  标准差: {std_val:.6e}")
+    else:
+        # 对于较大的值，使用普通格式
+        print(f"  最小值: {min_val:.6f}")
+        print(f"  最大值: {max_val:.6f}")
+        print(f"  平均值: {mean_val:.6f}")
+        print(f"  标准差: {std_val:.6f}")
     print("-" * 60)
     
     # 如果是3通道数据（引力波数据格式）
@@ -50,11 +65,23 @@ def show_npy_file(file_path):
         detector_names = ["LIGO Hanford", "LIGO Livingston", "Virgo"]
         for i, name in enumerate(detector_names):
             channel = data[i]
+            min_val = channel.min()
+            max_val = channel.max()
+            mean_val = channel.mean()
+            std_val = channel.std()
+            
             print(f"  {name} (通道 {i}):")
-            print(f"    最小值: {channel.min():.6f}")
-            print(f"    最大值: {channel.max():.6f}")
-            print(f"    平均值: {channel.mean():.6f}")
-            print(f"    标准差: {channel.std():.6f}")
+            # 根据数值大小选择合适的显示格式
+            if abs(min_val) < 1e-3 or abs(max_val) < 1e-3:
+                print(f"    最小值: {min_val:.6e}")
+                print(f"    最大值: {max_val:.6e}")
+                print(f"    平均值: {mean_val:.6e}")
+                print(f"    标准差: {std_val:.6e}")
+            else:
+                print(f"    最小值: {min_val:.6f}")
+                print(f"    最大值: {max_val:.6f}")
+                print(f"    平均值: {mean_val:.6f}")
+                print(f"    标准差: {std_val:.6f}")
         print("-" * 60)
     
     # 显示数据的前几个值
@@ -106,7 +133,7 @@ def show_npy_file(file_path):
                 ax.grid(True, alpha=0.3)
             
             plt.tight_layout()
-            # 在Jupyter notebook中显示图表
+            # 在Jupyter notebook中显示图表     #图还是不显示
             try:
                 from IPython.display import display
                 display(plt.gcf())
