@@ -28,6 +28,7 @@ from src.train import Trainer
 # --- 配置参数 ---
 DATA_DIR = "data/raw"  # 数据目录
 LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
+DATA_DIR = DATA_DIR + "/g2net_medium" # 以前用的os.walk
 
 # DATA_DIR = "/kaggle/input/g2net-gravitational-wave-detection/train"
 # DATA_DIR = "E:/老笔记本电脑移出/data..raw"
