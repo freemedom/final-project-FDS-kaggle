@@ -4,6 +4,7 @@
 """
 
 import os
+import sys
 import warnings
 import numpy as np
 import torch
@@ -11,7 +12,34 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import Resize
 from tqdm import tqdm
-from src.transforms import GWTransform
+
+# 添加项目根目录到Python路径（兼容Kaggle和本地环境）
+# 获取当前文件所在目录（src/）
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# 获取项目根目录（final-project-FDS/）
+project_root = os.path.dirname(current_dir)
+
+print(f"项目根目录: {project_root} 当前目录: {current_dir}")
+
+# 将项目根目录添加到Python路径
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# 导入模块（现在应该可以正常导入了）
+try:
+    from src.transforms import GWTransform
+except ImportError as e:
+    # 如果还是失败，尝试直接导入（适用于某些特殊环境）
+    try:
+        from transforms import GWTransform
+    except ImportError:
+        # 如果还是失败，打印调试信息
+        print(f"❌ 导入错误: 无法导入 GWTransform")
+        print(f"   当前目录: {current_dir}")
+        print(f"   项目根目录: {project_root}")
+        print(f"   Python路径: {sys.path[:3]}...")
+        print(f"   原始错误: {e}")
+        raise
 
 # 抑制警告
 os.environ["PYTHONWARNINGS"] = "ignore"
@@ -210,7 +238,13 @@ def main():
     主函数：执行测试集预测流程
     """
     import argparse
-    from src.model import GWClassifier
+    
+    # 导入模型（项目根目录已在sys.path中）
+    try:
+        from src.model import GWClassifier
+    except ImportError:
+        # 如果还是失败，尝试直接导入
+        from model import GWClassifier
     
     # 解析命令行参数
     parser = argparse.ArgumentParser(description='测试集预测')
