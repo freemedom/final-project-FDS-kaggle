@@ -36,7 +36,7 @@ LABELS_FILE = os.path.join(DATA_DIR, "subset_labels.csv")  # 标签文件路径
 MODEL_SAVE_PATH = "models/best_model.pth"  # 模型保存路径
 
 BATCH_SIZE = 32  # 批次大小
-EPOCHS = 12      # 训练轮数
+EPOCHS = 10      # 训练轮数
 LEARNING_RATE = 5e-5  # 学习率
 SEED = 42        # 随机种子，确保结果可复现         
 

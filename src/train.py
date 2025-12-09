@@ -137,7 +137,13 @@ class Trainer:
         """
         print(f"Starting training on {self.device}...")
         
-        # 学习率调度器：当验证AUC不再提升时降低学习率
+        # 学习率调度器：
+        # - 当前使用 ReduceLROnPlateau：监控验证 AUC，若若干轮(patience)不提升则将 lr*factor；
+        #   优点是自适应，无需预设轮次；缺点是指标波动时可能频繁触发。
+        # - StepLR：每隔固定 step 将 lr 乘以 gamma；稳定、可预期，但无法适应指标走势。
+        # - CosineAnnealingLR：余弦曲线衰减，前期大步探索、后期平滑收敛；适合长周期训练。
+        # - OneCycleLR：先升后降的单周期策略，常搭配较大初始 lr，加速收敛但对超参敏感。
+        # 可根据任务长度、验证指标平滑度、是否需快速收敛等选择替代方案。
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer, mode='max', factor=0.5, patience=2  # 耐心值2，因子0.5
         )
