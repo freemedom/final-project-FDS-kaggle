@@ -101,6 +101,8 @@ def get_file_path(data_dir, file_id):
         raise ValueError(f"File ID must be at least 3 characters: {file_id}")
     
     # 扁平目录：直接放在 data/raw 下
+    # 标准化路径：消除多余分隔符/相对符号，方便后续 endswith 判断
+    # 例：normpath("data/raw/../raw//") -> "data\\raw"（Windows）或 "data/raw"（类Unix）
     norm_dir = os.path.normpath(data_dir)
     if norm_dir.endswith(os.path.normpath("data/raw")):
         return os.path.join(data_dir, f"{file_id}.npy")
@@ -140,6 +142,9 @@ def create_dataloaders(data_dir, labels_file, batch_size=32, split_ratio=0.8):
         # 根据文件ID直接构建路径
         file_path = get_file_path(data_dir, f_id)
         print(f"Resolved path for id={f_id}: {file_path}")
+        
+        # 打印当前的工作路径
+        print(f"Current working directory: {os.getcwd()}")
         
         # 检查文件是否存在
         if os.path.exists(file_path):
