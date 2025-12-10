@@ -1,0 +1,3 @@
+[submodule "reference_github/kaggle-g2net-public-main"]
+	path = reference_github/kaggle-g2net-public-main
+	url = https://github.com/freemedom/final-project-FDS-kaggle.git
